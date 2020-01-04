@@ -1,41 +1,99 @@
 import React from 'react';
 import './App.css';
 
+class Break extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      time: 5
+    }
+    //this.updateTime = this.updateTime.bind(this);
+    this.decrement = this.decrement.bind(this);
+    this.increment = this.increment.bind(this);
+  }
 
-class Control extends React.Component {
+  decrement() {
+    if (this.state.time > 0) {
+      this.setState({
+        time: this.state.time - 1
+      })
+    }
+  }
+
+  increment() {
+    if (this.state.time < 60) {
+      this.setState({
+        time: this.state.time + 1
+      })
+    }
+  }
+
   render() {
     return(
       <div>
-        <div id={this.props.ID}>{this.props.name}</div>        
+        <div id="break-label">Break</div>
         <div className="control">
-          <div className="btn" id={this.props.increment}>&#x025B4;</div>
-          <div id={this.props.lengthID}>{this.props.value}</div>
-          <div className="btn" id={this.props.decrement}>&#x025BE;</div>                
+          <div id="break-decrement" className="btn" onClick={this.decrement}> - </div>
+          <div id="break-length">{this.state.time}</div>
+          <div id="break-increment" className="btn" onClick={this.increment}> + </div>
         </div>
       </div>
-    );
+    )
+  }
+}
+
+class Session extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      time: 25
+    }
+    //this.updateTime = this.updateTime.bind(this);
+    this.decrement = this.decrement.bind(this);
+    this.increment = this.increment.bind(this);
+  }
+
+  decrement() {
+    if (this.state.time > 0) {
+      this.setState({
+        time: this.state.time - 1
+      })
+    }
+  }
+
+  increment() {
+    if (this.state.time < 60) {
+      this.setState({
+        time: this.state.time + 1
+      })
+    }
+  }
+
+  render() {
+    return(
+      <div>
+        <div id="break-label">Break</div>
+        <div className="control">
+          <div id="break-decrement" className="btn" onClick={this.decrement}> - </div>
+          <div id="break-length">{this.state.time}</div>
+          <div id="break-increment" className="btn" onClick={this.increment}> + </div>
+        </div>
+      </div>
+    )
   }
 }
 
 function App() {
   return (
-    <div className="App">
+    <div className="app">
       <h1>Pomodoro Clock</h1>
-      <Control 
-      name="Break Length" 
-      ID="break-label" 
-      increment="break-increment" 
-      decrement="break-decrement" 
-      lengthID="break-length" 
-      value="5"/>
-      <Control 
-      name="Session Length" 
-      ID="session-label" 
-      increment="session-increment" 
-      decrement="session-decrement" 
-      lengthID="session-length" 
-      value="25"/>
-           
+      <div className="control-pnl">
+        <Break/>
+        <Session />
+      </div>
+      <div className="status">
+        
+      </div>                 
     </div>
   );
 }
