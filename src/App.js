@@ -51,12 +51,14 @@ class App extends React.Component {
       <div className="app">
       <h1>Pomodoro Clock</h1>
       <div className="control-pnl">
-        <Break 
-          time={this.state.break}
+        <SettingComponent 
+          name="Break"
           increment={this.incrementBreak}
           decrement={this.decrementBreak}
+          time={this.state.break}
         />
-        <Session 
+        <SettingComponent 
+          name="Session"
           time={this.state.session}
           increment={this.incrementSession}
           decrement={this.decrementSession}
@@ -69,7 +71,7 @@ class App extends React.Component {
   }
 }
 
-class Break extends React.Component {
+class SettingComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -80,29 +82,7 @@ class Break extends React.Component {
   render() {
     return(
       <div>
-        <div id="break-label">Break</div>
-        <div className="control">
-          <div id="break-decrement" className="btn" onClick={this.props.decrement}> - </div>
-          <div id="break-length">{this.props.time}</div>
-          <div id="break-increment" className="btn" onClick={this.props.increment}> + </div>
-        </div>
-      </div>
-    )
-  }
-}
-
-class Session extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      time: this.props.time
-    }
-  }
-
-  render() {
-    return(
-      <div>
-        <div id="break-label">Session</div>
+        <div id="break-label">{this.props.name}</div>
         <div className="control">
           <div id="break-decrement" className="btn" onClick={this.props.decrement}> - </div>
           <div id="break-length">{this.props.time}</div>
