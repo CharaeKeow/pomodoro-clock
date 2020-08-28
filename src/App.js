@@ -77,8 +77,6 @@ class Break extends React.Component {
     }
   }
 
-  
-
   render() {
     return(
       <div>
@@ -104,7 +102,7 @@ class Session extends React.Component {
   render() {
     return(
       <div>
-        <div id="break-label">Break</div>
+        <div id="break-label">Session</div>
         <div className="control">
           <div id="break-decrement" className="btn" onClick={this.props.decrement}> - </div>
           <div id="break-length">{this.props.time}</div>
@@ -114,7 +112,5 @@ class Session extends React.Component {
     )
   }
 }
-
-
 
 export default App;
