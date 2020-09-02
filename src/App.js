@@ -9,8 +9,8 @@ class App extends React.Component {
     this.state = {
       breakLength: 5,
       sessionLength: 25,
-      currentCountdown: 'session',
-      timeInSeconds: 25 * 60,
+      currentSession: 'session',
+      timeInSeconds: 25 * 60, //seems like using sessionLength * 60 doesn't work. Yh, my React skills is rusty 😣
 
     }
     /* don't think need two separate increment & decrement functions for both break & session. 
@@ -47,9 +47,10 @@ class App extends React.Component {
    * here, otherwise the state timeInSeconds will lag in updating its value.
    * Lag here means it will update its value in the next function call instead of current call.
    * 
-   * Credit to Lam Pham's React pomodoro clock (https://github.com/completejavascript/pomodoro-clock) 
-   * for helping me solve this issue
+   * Credit to Lam Pham's cool pomodoro clock (https://github.com/completejavascript/pomodoro-clock) 
+   * code for helping me solve this issue 
    */
+
   decrementSession() {
     if (this.state.sessionLength > 0) {
       this.setState({
@@ -71,12 +72,21 @@ class App extends React.Component {
   onCountdown() {
     this.setState({
       timeInSeconds: this.state.timeInSeconds - 1
-    })
+    });
   }
 
   start() { };
   stop() { };
-  reset() { };
+
+  reset() {
+    this.setState({
+      //reset all to default
+      breakLength: 5,
+      sessionLength: 25,
+      currentCountdown: 'session',
+      timeInSeconds: 25 * 60,
+    })
+  };
 
   render() {
     return (
@@ -100,7 +110,13 @@ class App extends React.Component {
           <Time time={this.state.sessionLength} />
         </div>
         <div className="bottom-pnl">
-          <StartStop />
+          <StartStopButton
+            currentSession={this.state.currentSession}
+            timeInSeconds={this.state.timeInSeconds}
+          />
+          <ResetButton
+            reset={this.reset}
+          />
         </div>
       </div>
     )
@@ -139,14 +155,14 @@ class Time extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="display-pnl">
         <div>{this.props.time}</div>
       </div>
     )
   }
 }
 
-class StartStop extends React.Component {
+class StartStopButton extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -157,7 +173,17 @@ class StartStop extends React.Component {
   render() {
     return (
       <div>
-        <div className="button"></div>
+        <div className="startStop-btn">{this.state.currentSession}</div>
+      </div>
+    )
+  }
+}
+
+class ResetButton extends React.Component {
+  render() {
+    return (
+      <div>
+        <div onClick={this.props.reset} className="reset-btn">Reset</div>
       </div>
     )
   }
