@@ -1,5 +1,3 @@
-// @ts-check
-
 import React from 'react';
 import './App.css';
 
@@ -25,6 +23,7 @@ class App extends React.Component {
     this.onCountdown = this.onCountdown.bind(this);
     this.toggleStartStop = this.toggleStartStop.bind(this);
     this.reset = this.reset.bind(this);
+    this.calculateMinutesAndSeconds = this.calculateMinutesAndSeconds.bind(this);
   }
 
   decrementBreak() {
@@ -99,6 +98,26 @@ class App extends React.Component {
     })
   };
 
+  calculateMinutesAndSeconds() {
+
+    //Math.floor is used to cut off the trailing decimal points    
+    let minutes = Math.floor(this.state.timeInSeconds / 60); //convert seconds to minutes
+
+    //for seconds, subtract the remaining seconds with the exact minute * 60 (which is also seconds)
+    let seconds = this.state.timeInSeconds - (minutes * 60);
+
+    //simple time formatting (mm:ss)
+    if (minutes < 10) {
+      minutes = '0' + minutes; //blessing that JS is dynamic type 🔥
+    }
+
+    if (seconds < 10) {
+      seconds = '0' + seconds;
+    }
+
+    return `${minutes}: ${seconds}`; //heard this is the best way to concat string. It looks cool though
+  }
+
   render() {
     return (
       <div className="app">
@@ -118,7 +137,7 @@ class App extends React.Component {
           />
         </div>
         <div className="time">
-          <Time time={this.state.sessionLength} />
+          <Time time={this.calculateMinutesAndSeconds()} />
         </div>
         <div className="bottom-pnl">
           <StartStopButton
