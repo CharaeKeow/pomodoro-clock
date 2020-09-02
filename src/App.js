@@ -10,9 +10,10 @@ class App extends React.Component {
       breakLength: 5,
       sessionLength: 25,
       currentSession: 'session',
-      timeInSeconds: 25 * 60, //seems like using sessionLength * 60 doesn't work. Yh, my React skills is rusty 😣
-
+      timeInSeconds: 25 * 60, //seems like using sessionLength * 60 doesn't work. Yeah, I still sucks at React 😣
+      status: 'start', //either start or stop. passed to component startStop to indicate status
     }
+
     /* don't think need two separate increment & decrement functions for both break & session. 
     ** maybe combine them into just two functions. Question remains: how do I achieve that? Either
     ** pass args or have to do some checking in the function. 
@@ -22,8 +23,7 @@ class App extends React.Component {
     this.decrementSession = this.decrementSession.bind(this);
     this.incrementSession = this.incrementSession.bind(this);
     this.onCountdown = this.onCountdown.bind(this);
-    this.start = this.start.bind(this); //tbh, should look to combine start & stop to be just one funtion.
-    this.stop = this.stop.bind(this);
+    this.toggleStartStop = this.toggleStartStop.bind(this);
     this.reset = this.reset.bind(this);
   }
 
@@ -69,14 +69,24 @@ class App extends React.Component {
     }
   }
 
+  //Handle counting down the time by decrementing the remaining seconds by 1.
   onCountdown() {
     this.setState({
       timeInSeconds: this.state.timeInSeconds - 1
     });
   }
 
-  start() { };
-  stop() { };
+  toggleStartStop() {
+    if (this.state.status === 'start') { //eslint suggest me using '===' instead of '=='. Guess I'll follow
+      this.setState({
+        status: 'stop', //toggle (change 😉) from start to stop
+      });
+    } else {
+      this.setState({
+        status: 'start',
+      })
+    }
+  }
 
   reset() {
     this.setState({
@@ -85,6 +95,7 @@ class App extends React.Component {
       sessionLength: 25,
       currentCountdown: 'session',
       timeInSeconds: 25 * 60,
+      status: 'start',
     })
   };
 
@@ -111,8 +122,8 @@ class App extends React.Component {
         </div>
         <div className="bottom-pnl">
           <StartStopButton
-            currentSession={this.state.currentSession}
-            timeInSeconds={this.state.timeInSeconds}
+            status={this.state.status}
+            toggleStartStop={this.toggleStartStop}
           />
           <ResetButton
             reset={this.reset}
@@ -163,17 +174,12 @@ class Time extends React.Component {
 }
 
 class StartStopButton extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      currentSession: this.props.currentSession,
-    }
-  }
+  //Ahem, no need constructor here as we won't declare any local state here. (I read the docs 😎)
 
   render() {
     return (
       <div>
-        <div className="startStop-btn">{this.state.currentSession}</div>
+        <div onClick={this.props.toggleStartStop} className="startStop-btn">{this.props.status}</div>
       </div>
     )
   }
