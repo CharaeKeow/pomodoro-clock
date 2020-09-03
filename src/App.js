@@ -30,7 +30,7 @@ class App extends React.Component {
 
   //can only increment and decrement if it's not starting
   decrementBreak() {
-    if (this.state.breakLength > 0 && !this.state.isStart) {
+    if (this.state.breakLength > 1 && !this.state.isStart) {
       this.setState({
         breakLength: this.state.breakLength - 1
       })
@@ -54,7 +54,7 @@ class App extends React.Component {
    */
 
   decrementSession() {
-    if (this.state.sessionLength > 0 && !this.state.isStart) {
+    if (this.state.sessionLength > 1 && !this.state.isStart) {
       this.setState({
         sessionLength: this.state.sessionLength - 1,
         timeInSeconds: (this.state.sessionLength - 1) * 60,
@@ -153,13 +153,21 @@ class App extends React.Component {
         <h1>Pomodoro Clock</h1>
         <div className="control-pnl">
           <SettingComponent
-            name="Break"
+            name="Break Length"
+            id="break-label"
+            incrementId="break-increment"
+            decrementId="break-decrement"
+            lengthId="break-length"
             time={this.state.breakLength}
             increment={this.incrementBreak}
             decrement={this.decrementBreak}
           />
           <SettingComponent
-            name="Session"
+            name="Session Length"
+            id="session-label"
+            incrementId="session-increment"
+            decrementId="session-decrement"
+            lengthId="session-length"
             time={this.state.sessionLength}
             increment={this.incrementSession}
             decrement={this.decrementSession}
@@ -196,11 +204,11 @@ class SettingComponent extends React.Component {
   render() {
     return (
       <div>
-        <div id="break-label">{this.props.name}</div>
+        <div id={this.props.id}>{this.props.name}</div>
         <div className="control">
-          <div id="break-decrement" className="btn" onClick={this.props.decrement}> - </div>
-          <div id="break-length">{this.props.time}</div>
-          <div id="break-increment" className="btn" onClick={this.props.increment}> + </div>
+          <div id={this.props.decrementId} className="btn" onClick={this.props.decrement}> - </div>
+          <div id={this.props.lengthId}>{this.props.time}</div>
+          <div id={this.props.incrementId} className="btn" onClick={this.props.increment}> + </div>
         </div>
       </div>
     )
@@ -218,8 +226,8 @@ class Time extends React.Component {
   render() {
     return (
       <div className="display-pnl">
-        <div className="current-session">{this.props.status}</div>
-        <div>{this.props.time}</div>
+        <div id="timer-label" className="current-session">{this.props.status}</div>
+        <div id="time-left">{this.props.time}</div>
       </div>
     )
   }
@@ -231,7 +239,7 @@ class StartStopButton extends React.Component {
   render() {
     return (
       <div>
-        <div onClick={this.props.toggleStartStop} className="startStop-btn">{this.props.isStart ? 'Stop' : 'Start'}</div>
+        <div id="start_stop" onClick={this.props.toggleStartStop} className="startStop-btn">{this.props.isStart ? 'Stop' : 'Start'}</div>
       </div>
     )
   }
@@ -241,7 +249,7 @@ class ResetButton extends React.Component {
   render() {
     return (
       <div>
-        <div onClick={this.props.reset} className="reset-btn">Reset</div>
+        <div id="reset" onClick={this.props.reset} className="reset-btn">Reset</div>
       </div>
     )
   }
