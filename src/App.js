@@ -9,7 +9,8 @@ class App extends React.Component {
       sessionLength: 25,
       currentSession: 'session',
       timeInSeconds: 25 * 60, //seems like using sessionLength * 60 doesn't work. Yeah, I still sucks at React 😣
-      status: 'start', //either start or stop. passed to component startStop to indicate status
+      isStart: 0, //either start or stop. passed to component startStop to indicate status
+      intervalId: null, //set intervalId to null on initial load
     }
 
     /* don't think need two separate increment & decrement functions for both break & session. 
@@ -22,12 +23,14 @@ class App extends React.Component {
     this.incrementSession = this.incrementSession.bind(this);
     this.onCountdown = this.onCountdown.bind(this);
     this.toggleStartStop = this.toggleStartStop.bind(this);
+    this.switchStatus = this.switchStatus.bind(this);
     this.reset = this.reset.bind(this);
     this.calculateMinutesAndSeconds = this.calculateMinutesAndSeconds.bind(this);
   }
 
+  //can only increment and decrement if it's not starting
   decrementBreak() {
-    if (this.state.breakLength > 0) {
+    if (this.state.breakLength > 0 && !this.state.isStart) {
       this.setState({
         breakLength: this.state.breakLength - 1
       })
@@ -35,7 +38,7 @@ class App extends React.Component {
   }
 
   incrementBreak() {
-    if (this.state.breakLength < 60) {
+    if (this.state.breakLength < 60 && !this.state.isStart) {
       this.setState({
         breakLength: this.state.breakLength + 1
       })
@@ -51,7 +54,7 @@ class App extends React.Component {
    */
 
   decrementSession() {
-    if (this.state.sessionLength > 0) {
+    if (this.state.sessionLength > 0 && !this.state.isStart) {
       this.setState({
         sessionLength: this.state.sessionLength - 1,
         timeInSeconds: (this.state.sessionLength - 1) * 60,
@@ -60,7 +63,7 @@ class App extends React.Component {
   }
 
   incrementSession() {
-    if (this.state.sessionLength < 60) {
+    if (this.state.sessionLength < 60 && !this.state.isStart) {
       this.setState({
         sessionLength: this.state.sessionLength + 1,
         timeInSeconds: (this.state.sessionLength + 1) * 60,
@@ -76,25 +79,51 @@ class App extends React.Component {
   }
 
   toggleStartStop() {
-    if (this.state.status === 'start') { //eslint suggest me using '===' instead of '=='. Guess I'll follow
+    if (!this.state.isStart) { //eslint suggest me using '===' instead of '=='. Guess I'll follow
       this.setState({
-        status: 'stop', //toggle (change 😉) from start to stop
+        isStart: 1, //toggle (change 😉) from start to stop
+        intervalId: setInterval(() => { //use setInterval to repeatingly call the onCountdown functionS
+          this.onCountdown();
+          this.switchStatus();
+        }, 1000)
       });
     } else {
+      clearInterval(this.state.intervalId); //clear intervalId and also halt the countdown
+
       this.setState({
-        status: 'start',
+        isStart: 0, //if 'start', ask it to 'stop'
+        intervalId: null, //set intervalId to null again
       })
     }
   }
 
+  switchStatus() {
+    if (this.state.timeInSeconds < 0) { //end of session
+      if (this.state.currentSession === 'break') {
+        this.setState({
+          currentSession: 'start',
+          timeInSeconds: this.state.sessionLength * 60,
+        })
+      } else if (this.state.currentSession === 'session') {
+        this.setState({
+          currentSession: 'break',
+          timeInSeconds: this.state.breakLength * 60,
+        })
+      }
+    }
+  }
+
   reset() {
+    clearInterval(this.state.intervalId); //clear intervalId, hence stop the countdown
+
     this.setState({
       //reset all to default
       breakLength: 5,
       sessionLength: 25,
       currentCountdown: 'session',
       timeInSeconds: 25 * 60,
-      status: 'start',
+      isStart: 0,
+      intervalId: null,
     })
   };
 
@@ -137,11 +166,14 @@ class App extends React.Component {
           />
         </div>
         <div className="time">
-          <Time time={this.calculateMinutesAndSeconds()} />
+          <Time
+            time={this.calculateMinutesAndSeconds()}
+            status={this.state.currentSession}
+          />
         </div>
         <div className="bottom-pnl">
           <StartStopButton
-            status={this.state.status}
+            isStart={this.state.isStart}
             toggleStartStop={this.toggleStartStop}
           />
           <ResetButton
@@ -186,6 +218,7 @@ class Time extends React.Component {
   render() {
     return (
       <div className="display-pnl">
+        <div className="current-session">{this.props.status}</div>
         <div>{this.props.time}</div>
       </div>
     )
@@ -198,7 +231,7 @@ class StartStopButton extends React.Component {
   render() {
     return (
       <div>
-        <div onClick={this.props.toggleStartStop} className="startStop-btn">{this.props.status}</div>
+        <div onClick={this.props.toggleStartStop} className="startStop-btn">{this.props.isStart ? 'Stop' : 'Start'}</div>
       </div>
     )
   }

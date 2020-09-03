@@ -17,6 +17,12 @@ code {
   font-size: 70px;
 }
 
+.current-session {
+  text-transform: uppercase;
+  font-size: 30px;
+  font-weight: bolder;
+}
+
 .bottom-pnl {
   display: flex;
   flex-direction: row;
