@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactFCCTest from 'react-fcctest';
 import './App.css';
 
 class App extends React.Component {
@@ -101,7 +102,7 @@ class App extends React.Component {
     if (this.state.timeInSeconds < 0) { //end of session
       if (this.state.currentSession === 'break') {
         this.setState({
-          currentSession: 'start',
+          currentSession: 'session',
           timeInSeconds: this.state.sessionLength * 60,
         })
       } else if (this.state.currentSession === 'session') {
@@ -120,7 +121,7 @@ class App extends React.Component {
       //reset all to default
       breakLength: 5,
       sessionLength: 25,
-      currentCountdown: 'session',
+      currentSession: 'session',
       timeInSeconds: 25 * 60,
       isStart: 0,
       intervalId: null,
@@ -144,7 +145,7 @@ class App extends React.Component {
       seconds = '0' + seconds;
     }
 
-    return `${minutes}: ${seconds}`; //heard this is the best way to concat string. It looks cool though
+    return `${minutes}:${seconds}`; //heard this is the best way to concat string. It looks cool though
   }
 
   render() {
@@ -188,6 +189,7 @@ class App extends React.Component {
             reset={this.reset}
           />
         </div>
+        <ReactFCCTest />
       </div>
     )
   }
