@@ -9,9 +9,11 @@ class App extends React.Component {
       breakLength: 5,
       sessionLength: 25,
       currentSession: 'session',
-      timeInSeconds: 25 * 60, //seems like using sessionLength * 60 doesn't work. Yeah, I still sucks at React 😣
+      timeInSeconds: 25 * 60, //for debugging. Uncomment later
+      //timeInSeconds: 25 * 60, //seems like using sessionLength * 60 doesn't work. Yeah, I still sucks at React 😣
       isStart: 0, //either start or stop. passed to component startStop to indicate status
       intervalId: null, //set intervalId to null on initial load
+      timerColor: { color: '#000000' }, //for fancy-styling the color during transition.
     }
 
     /* don't think need two separate increment & decrement functions for both break & session. 
@@ -100,15 +102,18 @@ class App extends React.Component {
 
   switchStatus() {
     if (this.state.timeInSeconds < 0) { //end of session
+      this.audioBeep.play();
       if (this.state.currentSession === 'break') {
         this.setState({
           currentSession: 'session',
           timeInSeconds: this.state.sessionLength * 60,
+          timerColor: { color: '#000000' }
         })
       } else if (this.state.currentSession === 'session') {
         this.setState({
           currentSession: 'break',
           timeInSeconds: this.state.breakLength * 60,
+          timerColor: { color: '#4848ff' }
         })
       }
     }
@@ -116,7 +121,8 @@ class App extends React.Component {
 
   reset() {
     clearInterval(this.state.intervalId); //clear intervalId, hence stop the countdown
-
+    this.audioBeep.pause();
+    this.audioBeep.currentTime = 0; //reset the beep to start of the sound
     this.setState({
       //reset all to default
       breakLength: 5,
@@ -125,6 +131,7 @@ class App extends React.Component {
       timeInSeconds: 25 * 60,
       isStart: 0,
       intervalId: null,
+      timerColor: { color: '#000000' }
     })
   };
 
@@ -178,6 +185,7 @@ class App extends React.Component {
           <Time
             time={this.calculateMinutesAndSeconds()}
             status={this.state.currentSession}
+            color={this.state.timerColor}
           />
         </div>
         <div className="bottom-pnl">
@@ -189,11 +197,17 @@ class App extends React.Component {
             reset={this.reset}
           />
         </div>
+        <audio id="beep" preload="auto" ref={audio => this.audioBeep = audio} src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"></audio>
         <ReactFCCTest />
-      </div>
+      </div >
     )
   }
 }
+
+/* ===TODO===
+ * Perhaps split the component into separate file to clear clutter. 
+ * Will check first if that is a best practice
+ */
 
 class SettingComponent extends React.Component {
   constructor(props) {
@@ -228,7 +242,7 @@ class Time extends React.Component {
   render() {
     return (
       <div className="display-pnl">
-        <div id="timer-label" className="current-session">{this.props.status}</div>
+        <div style={this.props.color} id="timer-label" className="current-session">{this.props.status}</div>
         <div id="time-left">{this.props.time}</div>
       </div>
     )
