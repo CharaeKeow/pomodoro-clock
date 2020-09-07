@@ -2,7 +2,7 @@ import React from 'react';
 import ReactFCCTest from 'react-fcctest';
 import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMoon, faPlay, faStop, faSyncAlt, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
+import { faPlay, faStop, faSyncAlt, faArrowUp, faArrowDown, faHeart } from '@fortawesome/free-solid-svg-icons';
 
 class App extends React.Component {
   constructor(props) {
@@ -11,13 +11,13 @@ class App extends React.Component {
       breakLength: 5,
       sessionLength: 25,
       currentSession: 'session',
-      timeInSeconds: 2, //for debugging. Uncomment later
+      timeInSeconds: 25 * 60, //for debugging. Uncomment later
       //timeInSeconds: 25 * 60, //seems like using sessionLength * 60 doesn't work. Yeah, I still sucks at React 😣
       isStart: 0, //either start or stop. passed to component startStop to indicate status
       intervalId: null, //set intervalId to null on initial load
-      timerColor: { color: '#fff' }, //for fancy-styling the color during transition.
+      timerColor: { color: '#232323' }, //for fancy-styling the color during transition.
       playStopIcon: faPlay, //set initial to play
-      alarmWarningColor: { color: '#f70000' }
+      alarmWarningColor: { color: '#232323' }
     }
 
     /* don't think need two separate increment & decrement functions for both break & session. 
@@ -114,7 +114,7 @@ class App extends React.Component {
       });
     } else {
       this.setState({
-        alarmWarningColor: { color: '#000' }
+        alarmWarningColor: { color: '#232323' }
       });
     }
   }
@@ -127,16 +127,16 @@ class App extends React.Component {
         this.setState({
           currentSession: 'session',
           timeInSeconds: this.state.sessionLength * 60,
-          timerColor: { color: '#000000' },
-          alarmWarningColor: { color: '#000' }
+          timerColor: { color: '#232323' },
+          alarmWarningColor: { color: '#232323' }
         })
       } else if (this.state.currentSession === 'session') {
         this.setState({
           currentSession: 'break',
           timeInSeconds: this.state.breakLength * 60,
           //timerColor: { color: '#4848ff' }
-          timerColor: { color: '#d23669' },
-          alarmWarningColor: { color: '#000' }
+          timerColor: { color: '#f95738' },
+          alarmWarningColor: { color: '#232323' }
         })
       }
     }
@@ -154,9 +154,9 @@ class App extends React.Component {
       timeInSeconds: 25 * 60,
       isStart: 0,
       intervalId: null,
-      timerColor: { color: '#000000' },
+      timerColor: { color: '#232323' },
       playStopIcon: faPlay,
-      alarmWarningColor: { color: '#000' },
+      alarmWarningColor: { color: '#232323' },
     })
   };
 
@@ -182,53 +182,57 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="app">
-        {/*<DarkModeButton />*/}
-        <h1>Pomodoro Clock</h1>
-        <div className="control-pnl">
-          <SettingComponent
-            name="Session Length"
-            id="session-label"
-            incrementId="session-increment"
-            decrementId="session-decrement"
-            lengthId="session-length"
-            time={this.state.sessionLength}
-            increment={this.incrementSession}
-            decrement={this.decrementSession}
-          />
-          <SettingComponent
-            name="Break Length"
-            id="break-label"
-            incrementId="break-increment"
-            decrementId="break-decrement"
-            lengthId="break-length"
-            time={this.state.breakLength}
-            increment={this.incrementBreak}
-            decrement={this.decrementBreak}
-          />
-        </div>
-        <div className="time">
-          <Time
-            time={this.calculateMinutesAndSeconds()}
-            status={this.state.currentSession}
-            color={this.state.timerColor}
-            alarmWarningColor={this.state.alarmWarningColor}
-          />
-        </div>
-        <div className="bottom-pnl">
-          <StartStopButton
-            isStart={this.state.isStart}
-            toggleStartStop={this.toggleStartStop}
-            playStopIcon={this.state.playStopIcon}
-          />
+      <div>
+        <div className="app">
+          {/*<DarkModeButton />*/}
+          <h1>Pomodoro Clock</h1>
+          <div className="control-pnl">
+            <SettingComponent
+              name="Session Length"
+              id="session-label"
+              incrementId="session-increment"
+              decrementId="session-decrement"
+              lengthId="session-length"
+              time={this.state.sessionLength}
+              increment={this.incrementSession}
+              decrement={this.decrementSession}
+            />
+            <SettingComponent
+              name="Break Length"
+              id="break-label"
+              incrementId="break-increment"
+              decrementId="break-decrement"
+              lengthId="break-length"
+              time={this.state.breakLength}
+              increment={this.incrementBreak}
+              decrement={this.decrementBreak}
+            />
+          </div>
+          <div className="time">
+            <Time
+              time={this.calculateMinutesAndSeconds()}
+              status={this.state.currentSession}
+              color={this.state.timerColor}
+              alarmWarningColor={this.state.alarmWarningColor}
+            />
+          </div>
+          <div className="bottom-pnl">
+            <StartStopButton
+              isStart={this.state.isStart}
+              toggleStartStop={this.toggleStartStop}
+              playStopIcon={this.state.playStopIcon}
+            />
 
-          <ResetButton
-            reset={this.reset}
-          />
-        </div>
-        <audio id="beep" preload="auto" ref={audio => this.audioBeep = audio} src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"></audio>
-        <ReactFCCTest />
-      </div >
+            <ResetButton
+              reset={this.reset}
+            />
+          </div>
+          <audio id="beep" preload="auto" ref={audio => this.audioBeep = audio} src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"></audio>
+          <ReactFCCTest />
+          <div class="footer"></div>
+        </div >
+        <Footer />
+      </div>
     )
   }
 }
@@ -254,7 +258,7 @@ class SettingComponent extends React.Component {
   render() {
     return (
       <div>
-        <div id={this.props.id}>{this.props.name}</div>
+        <div className="name" id={this.props.id}>{this.props.name}</div>
         <div className="control">
           <div id={this.props.decrementId} className="btn" onClick={this.props.decrement}> <FontAwesomeIcon icon={faArrowDown} /> </div>
           <div className="control-time" id={this.props.lengthId}>{this.props.time}  </div>
@@ -295,17 +299,12 @@ class Time extends React.Component {
   }
 }
 
-class DarkModeButton extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      darkMode: 0, //default light mode
-    }
-  }
+class Footer extends React.Component {
   render() {
     return (
-      <div>
-        <FontAwesomeIcon icon={faMoon} spin />
+      <div className="footer">
+        <p>Coded and designed with <FontAwesomeIcon className="heart" icon={faHeart} /> by <a href="https://github.com/CharaeKeow" target="_blank" rel="noopener noreferrer" >Charae Keow</a>. </p>
+        <p>View the original source code on <a href="https://github.com/CharaeKeow/pomodoro-clock" target="_blank" rel="noopener noreferrer">GitHub</a></p>
       </div>
     )
   }
