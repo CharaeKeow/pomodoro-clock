@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactFCCTest from 'react-fcctest';
 import './App.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMoon, faPlay, faStop, faSyncAlt, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
 
 class App extends React.Component {
   constructor(props) {
@@ -9,11 +11,13 @@ class App extends React.Component {
       breakLength: 5,
       sessionLength: 25,
       currentSession: 'session',
-      timeInSeconds: 25 * 60, //for debugging. Uncomment later
+      timeInSeconds: 2, //for debugging. Uncomment later
       //timeInSeconds: 25 * 60, //seems like using sessionLength * 60 doesn't work. Yeah, I still sucks at React 😣
       isStart: 0, //either start or stop. passed to component startStop to indicate status
       intervalId: null, //set intervalId to null on initial load
-      timerColor: { color: '#000000' }, //for fancy-styling the color during transition.
+      timerColor: { color: '#fff' }, //for fancy-styling the color during transition.
+      playStopIcon: faPlay, //set initial to play
+      alarmWarningColor: { color: '#f70000' }
     }
 
     /* don't think need two separate increment & decrement functions for both break & session. 
@@ -29,6 +33,7 @@ class App extends React.Component {
     this.switchStatus = this.switchStatus.bind(this);
     this.reset = this.reset.bind(this);
     this.calculateMinutesAndSeconds = this.calculateMinutesAndSeconds.bind(this);
+    this.assignAlarmColor = this.assignAlarmColor.bind(this);
   }
 
   //can only increment and decrement if it's not starting
@@ -86,34 +91,52 @@ class App extends React.Component {
       this.setState({
         isStart: 1, //toggle (change 😉) from start to stop
         intervalId: setInterval(() => { //use setInterval to repeatingly call the onCountdown functionS
+
           this.onCountdown();
           this.switchStatus();
-        }, 1000)
+        }, 1000),
+        playStopIcon: faStop,
       });
     } else {
       clearInterval(this.state.intervalId); //clear intervalId and also halt the countdown
-
       this.setState({
         isStart: 0, //if 'start', ask it to 'stop'
         intervalId: null, //set intervalId to null again
+        playStopIcon: faPlay,
       })
     }
   }
 
+  assignAlarmColor() {
+    if (this.state.timeInSeconds < 60) {
+      this.setState({
+        alarmWarningColor: { color: '#f70000' }
+      });
+    } else {
+      this.setState({
+        alarmWarningColor: { color: '#000' }
+      });
+    }
+  }
+
   switchStatus() {
+    this.assignAlarmColor();
     if (this.state.timeInSeconds < 0) { //end of session
-      this.audioBeep.play();
+      this.audioBeep.play(); //play the audio
       if (this.state.currentSession === 'break') {
         this.setState({
           currentSession: 'session',
           timeInSeconds: this.state.sessionLength * 60,
-          timerColor: { color: '#000000' }
+          timerColor: { color: '#000000' },
+          alarmWarningColor: { color: '#000' }
         })
       } else if (this.state.currentSession === 'session') {
         this.setState({
           currentSession: 'break',
           timeInSeconds: this.state.breakLength * 60,
-          timerColor: { color: '#4848ff' }
+          //timerColor: { color: '#4848ff' }
+          timerColor: { color: '#d23669' },
+          alarmWarningColor: { color: '#000' }
         })
       }
     }
@@ -121,7 +144,7 @@ class App extends React.Component {
 
   reset() {
     clearInterval(this.state.intervalId); //clear intervalId, hence stop the countdown
-    this.audioBeep.pause();
+    this.audioBeep.pause(); //pause current audio
     this.audioBeep.currentTime = 0; //reset the beep to start of the sound
     this.setState({
       //reset all to default
@@ -131,7 +154,9 @@ class App extends React.Component {
       timeInSeconds: 25 * 60,
       isStart: 0,
       intervalId: null,
-      timerColor: { color: '#000000' }
+      timerColor: { color: '#000000' },
+      playStopIcon: faPlay,
+      alarmWarningColor: { color: '#000' },
     })
   };
 
@@ -158,18 +183,9 @@ class App extends React.Component {
   render() {
     return (
       <div className="app">
+        {/*<DarkModeButton />*/}
         <h1>Pomodoro Clock</h1>
         <div className="control-pnl">
-          <SettingComponent
-            name="Break Length"
-            id="break-label"
-            incrementId="break-increment"
-            decrementId="break-decrement"
-            lengthId="break-length"
-            time={this.state.breakLength}
-            increment={this.incrementBreak}
-            decrement={this.decrementBreak}
-          />
           <SettingComponent
             name="Session Length"
             id="session-label"
@@ -180,19 +196,32 @@ class App extends React.Component {
             increment={this.incrementSession}
             decrement={this.decrementSession}
           />
+          <SettingComponent
+            name="Break Length"
+            id="break-label"
+            incrementId="break-increment"
+            decrementId="break-decrement"
+            lengthId="break-length"
+            time={this.state.breakLength}
+            increment={this.incrementBreak}
+            decrement={this.decrementBreak}
+          />
         </div>
         <div className="time">
           <Time
             time={this.calculateMinutesAndSeconds()}
             status={this.state.currentSession}
             color={this.state.timerColor}
+            alarmWarningColor={this.state.alarmWarningColor}
           />
         </div>
         <div className="bottom-pnl">
           <StartStopButton
             isStart={this.state.isStart}
             toggleStartStop={this.toggleStartStop}
+            playStopIcon={this.state.playStopIcon}
           />
+
           <ResetButton
             reset={this.reset}
           />
@@ -204,10 +233,15 @@ class App extends React.Component {
   }
 }
 
-/* ===TODO===
- * Perhaps split the component into separate file to clear clutter. 
- * Will check first if that is a best practice
- */
+class ResetButton extends React.Component {
+  render() {
+    return (
+      <div>
+        <div id="reset" onClick={this.props.reset} className="reset-btn">Reset <FontAwesomeIcon icon={faSyncAlt} /></div>
+      </div>
+    )
+  }
+}
 
 class SettingComponent extends React.Component {
   constructor(props) {
@@ -222,10 +256,22 @@ class SettingComponent extends React.Component {
       <div>
         <div id={this.props.id}>{this.props.name}</div>
         <div className="control">
-          <div id={this.props.decrementId} className="btn" onClick={this.props.decrement}> - </div>
-          <div id={this.props.lengthId}>{this.props.time}</div>
-          <div id={this.props.incrementId} className="btn" onClick={this.props.increment}> + </div>
+          <div id={this.props.decrementId} className="btn" onClick={this.props.decrement}> <FontAwesomeIcon icon={faArrowDown} /> </div>
+          <div className="control-time" id={this.props.lengthId}>{this.props.time}  </div>
+          <div id={this.props.incrementId} className="btn" onClick={this.props.increment}> <FontAwesomeIcon icon={faArrowUp} /> </div>
         </div>
+      </div>
+    )
+  }
+}
+
+class StartStopButton extends React.Component {
+  //Ahem, no need constructor here as we won't declare any local state here. (I read the docs 😎)
+
+  render() {
+    return (
+      <div>
+        <div id="start_stop" onClick={this.props.toggleStartStop} className="startStop-btn">{this.props.isStart ? 'Stop' : 'Start'} <FontAwesomeIcon icon={this.props.playStopIcon} /></div>
       </div>
     )
   }
@@ -243,29 +289,23 @@ class Time extends React.Component {
     return (
       <div className="display-pnl">
         <div style={this.props.color} id="timer-label" className="current-session">{this.props.status}</div>
-        <div id="time-left">{this.props.time}</div>
+        <div style={this.props.alarmWarningColor} id="time-left">{this.props.time}</div>
       </div>
     )
   }
 }
 
-class StartStopButton extends React.Component {
-  //Ahem, no need constructor here as we won't declare any local state here. (I read the docs 😎)
-
-  render() {
-    return (
-      <div>
-        <div id="start_stop" onClick={this.props.toggleStartStop} className="startStop-btn">{this.props.isStart ? 'Stop' : 'Start'}</div>
-      </div>
-    )
+class DarkModeButton extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      darkMode: 0, //default light mode
+    }
   }
-}
-
-class ResetButton extends React.Component {
   render() {
     return (
       <div>
-        <div id="reset" onClick={this.props.reset} className="reset-btn">Reset</div>
+        <FontAwesomeIcon icon={faMoon} spin />
       </div>
     )
   }
